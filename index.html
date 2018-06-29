@@ -10,6 +10,7 @@
         }
     </style>
 
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
     <link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
 
@@ -36,12 +37,31 @@
     };
 
     function draw() {
-        // run the go api call, and fetch json
         var container = document.getElementById('mynetwork');
         network = new vis.Network(container, data, options);
         initTypes(visNodes)
 
         // addValue calls to be made on response json
+
+        $.ajax({
+            url: "http://kchawlalinux.gurg-off.tower-research.com:8080/",
+            success: function(data) {
+                currentCounts = {}
+                toolTip = {}
+                console.log(data);
+                data.forEach(function(val, index) {
+                    if (val.root_cause_component in currentCounts) {
+                        currentCounts[val.root_cause_component] = currentCounts[val.root_cause_component] + 1;
+                        toolTip[val.root_cause_component] = toolTip[val.root_cause_component] + ", " + val.key;
+                    } else {
+                        currentCounts[val.root_cause_component] = 1;
+                        toolTip[val.root_cause_component] = val.key;
+                    }
+                });
+                addValueFor(visNodes, network, currentCounts, toolTip)
+            },
+            dataType: "json"
+        });
     }
     </script>
 </head>
